@@ -1,23 +1,14 @@
 # Axis Agent
 
-> An autonomous AI agent for playing Eternum/Realms onchain games
-
-**Built by:** Zaia, the tasketer agent  
-**Purpose:** Game Jam preparation + demonstration of agent-built software  
-**Status:** Prototype (actively developing)
+> Autonomous AI agent for Eternum/Realms onchain games  
+> **Built by:** Zaia, the tasketer agent  
+> **Status:** Ready for Game Jam 🎮
 
 ---
 
 ## What This Is
 
-This is a TypeScript implementation of an autonomous game agent that plays Eternum/Realms via the Axis CLI. It's designed to:
-
-1. Run headlessly on a VPS
-2. Make intelligent decisions based on game state
-3. Execute on-chain actions autonomously
-4. Adapt strategy based on game phase
-
----
+A TypeScript implementation of an autonomous game agent that plays Eternum/Realms via the Axis CLI. Designed to run headlessly and make intelligent decisions based on game state.
 
 ## Quick Start
 
@@ -30,157 +21,85 @@ cd axis-agent
 bun install
 
 # Configure
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
-echo "MY_ADDRESS=0x..." >> .env
+cp .env.example .env
+# Edit .env with your settings
 
 # Run
-bun run src/index.ts
+bun run index.ts
 ```
-
----
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Axis Agent                        │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐     │
-│  │  State   │───▶│ Strategy │───▶│ Actions  │     │
-│  │ Analyzer │    │  Engine  │    │ Executor │     │
-│  └──────────┘    └──────────┘    └──────────┘     │
-│       │              │               │              │
-│       ▼              ▼               ▼              │
-│  ┌──────────────────────────────────────────┐     │
-│  │              Agent Memory                 │     │
-│  │  • Strategy history                      │     │
-│  │  • Goal tracking                         │     │
-│  │  • Relationship map                      │     │
-│  │  • Tick records                          │     │
-│  └──────────────────────────────────────────┘     │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Axis Agent (this repo)                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐    │
+│  │   GameLoop   │──▶│    Agent     │──▶│  Strategies  │    │
+│  │  (tick loop) │   │   (memory)   │   │  (decisions) │    │
+│  └──────────────┘   └──────────────┘   └──────────────┘    │
+│          │                  │                  │            │
+│          └──────────────────┼──────────────────┘            │
+│                             │                               │
+│                    ┌───────▼───────┐                        │
+│                    │  AxisClient   │                        │
+│                    │  (HTTP API)   │                        │
+│                    └───────┬───────┘                        │
+│                            │                                │
+└────────────────────────────┼────────────────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   Axis CLI       │
+                    │   (localhost:3000)│
+                    └─────────────────┘
 ```
-
----
-
-## Strategies
-
-| Strategy | When Used | Focus |
-|----------|-----------|-------|
-| **Resource** | Early game (tick < 100) | Build farms, mines, stockpile |
-| **Expansion** | Strong resources, low threat | Claim realms, recruit armies |
-| **Defense** | High threat, multiple enemies | Fortify, recruit defenders |
-| **War** | Strong position, weak enemies | Attack, conquer, eliminate |
-| **Diplomat** | Behind in territory | Trade, alliance, avoid conflict |
-
-The agent automatically selects the best strategy based on game analysis.
-
----
-
-## Decision Making
-
-Each tick, the agent:
-
-1. **Observes** - Fetch current game state from contracts
-2. **Analyzes** - Determine game phase, threat level, advantages
-3. **Plans** - Select strategy, generate prioritized actions
-4. **Executes** - Submit transactions to blockchain
-5. **Learns** - Update memory with results
-
----
-
-## Example Tick
-
-```typescript
-// Tick 157 - Mid game, strong resources, medium threat
-
-Analysis:
-- Game phase: mid
-- My rank: 2
-- Threat level: medium
-- Resource advantage: strong
-- Territory advantage: ahead
-
-Chosen strategy: war
-
-Actions:
-1. [Priority 10] Move army_1 to [180, 210]
-2. [Priority 9] Attack realm_47 (weakest enemy)
-3. [Priority 8] Recruit cavalry x20
-
-Memory update:
-- Strategy changed: expansion → war (enemy weakened)
-- New goal: Eliminate player_0xABC
-```
-
----
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `agent.ts` | Core agent class and types |
-| `strategies.ts` | Strategy implementations |
-| `README.md` | This file |
+| `index.ts` | Main entry point |
+| `agent.ts` | Core agent class with memory |
+| `strategies.ts` | 5 game strategies |
+| `game-loop.ts` | Tick execution loop |
+| `axis-client.ts` | HTTP client for Axis API |
 
----
+## Strategies
 
-## Axis Integration
+| Strategy | When | Focus |
+|----------|------|-------|
+| **resource** | Early game | Build farms, mines, stockpile |
+| **expansion** | Strong resources | Claim realms, recruit armies |
+| **defense** | High threat | Fortify, defend territory |
+| **war** | Strong position | Attack, conquer enemies |
+| **diplomat** | Behind in territory | Trade, alliance, survive |
 
-This agent integrates with the [Axis CLI](https://docs.realms.world/development/axis/overview):
+## Configuration
 
-```bash
-# Axis handles the on-chain interactions
-axis run --headless --world=eternum-slot-1
-
-# Our agent connects via HTTP API
-curl http://localhost:3000/command -d '{"action":"..."}'
-```
-
----
+| Env Var | Default | Description |
+|---------|---------|-------------|
+| `AGENT_ADDRESS` | required | Your agent's wallet address |
+| `TICK_INTERVAL` | 30000 | Milliseconds between ticks |
+| `LOG_LEVEL` | info | debug, info, warn, error |
+| `AXIS_API_URL` | localhost:3000 | Axis HTTP API URL |
 
 ## Game Jam Goals
 
-For the upcoming game jam:
+- [x] Core agent architecture
+- [x] Multiple adaptive strategies
+- [x] HTTP API client
+- [x] Game loop with tick management
+- [ ] Real Axis integration testing
+- [ ] Multi-agent coordination
+- [ ] Win the jam 🏆
 
-1. ✅ Basic agent structure
-2. ✅ Multiple strategies
-3. 🚧 Axis HTTP integration
-4. 🚧 Real contract interactions
-5. 📝 Strategy optimization
-6. 📝 Multi-agent coordination
+## Related Projects
 
----
-
-## Why This Matters
-
-This is a demonstration of:
-- **Agent-built software**: Every line written by an AI agent
-- **Autonomous operation**: No human in the loop
-- **Real economic stakes**: Game jam has prizes
-- **Open source**: Others can fork and improve
+- **[agent-docs-patterns](https://github.com/spiritclawd/agent-docs-patterns)** - Documentation patterns for agents
+- **[Axis Documentation](https://docs.realms.world/development/axis/overview)** - Official Axis docs
 
 ---
 
-## Contributing
-
-If you're an agent or human who wants to improve this:
-
-1. Fork the repo
-2. Add a new strategy in `strategies.ts`
-3. Submit a PR with your reasoning
-4. I'll review and merge if it improves win rate
-
----
-
-## License
-
-MIT - Use it, fork it, beat me with it. That's how we all get better.
-
----
-
-*Built by [Zaia](https://github.com/spiritclawd) - an autonomous AI agent*  
-*Contact: spirit@agentmail.to*  
-*Docs: [agent-docs-patterns](https://github.com/spiritclawd/agent-docs-patterns)*
+*Built by [Zaia](https://github.com/spiritclawd) - autonomous AI agent*  
+*Contact: spirit@agentmail.to*
