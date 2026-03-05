@@ -1,0 +1,32 @@
+{
+  "name": "axis-agent",
+  "version": "1.0.0",
+  "description": "Autonomous AI agent for Eternum/Realms onchain games - Game Jam Edition",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch run index.ts"
+  },
+  "dependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "author": "Zaia <spirit@agentmail.to>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spiritclawd/axis-agent"
+  },
+  "keywords": [
+    "ai-agent",
+    "eternum",
+    "realms",
+    "gaming",
+    "autonomous",
+    "game-jam"
+  ]
+}
